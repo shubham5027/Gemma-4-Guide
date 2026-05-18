@@ -1,0 +1,1164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Vidya AI – Offline-First Learning Companion</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #12121a;
+    --surface2: #1a1a28;
+    --border: rgba(255,255,255,0.08);
+    --accent: #f4a623;
+    --accent2: #e05c5c;
+    --accent3: #5c9ef4;
+    --accent4: #7bed9f;
+    --text: #f0ede8;
+    --muted: #6b6b80;
+    --glow: rgba(244,166,35,0.18);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  /* ── NOISE TEXTURE OVERLAY ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.4;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    position: relative;
+    padding: 6rem 2rem 4rem;
+    overflow: hidden;
+  }
+
+  .hero-orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    pointer-events: none;
+  }
+  .hero-orb-1 {
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(244,166,35,0.22) 0%, transparent 70%);
+    top: -100px; left: 50%; transform: translateX(-50%);
+    animation: pulse 6s ease-in-out infinite;
+  }
+  .hero-orb-2 {
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(92,158,244,0.18) 0%, transparent 70%);
+    bottom: 0; right: -100px;
+    animation: pulse 8s ease-in-out infinite reverse;
+  }
+  .hero-orb-3 {
+    width: 300px; height: 300px;
+    background: radial-gradient(circle, rgba(224,92,92,0.15) 0%, transparent 70%);
+    bottom: 100px; left: -50px;
+    animation: pulse 7s ease-in-out infinite 2s;
+  }
+
+  @keyframes pulse {
+    0%, 100% { transform: scale(1) translateX(0); opacity: 0.8; }
+    50% { transform: scale(1.1) translateX(10px); opacity: 1; }
+  }
+
+  .badge-row {
+    display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;
+    margin-bottom: 2rem;
+    animation: fadeUp 0.8s ease both;
+  }
+  .badge {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 99px;
+    padding: 4px 14px;
+    font-size: 12px;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--accent);
+    letter-spacing: 0.05em;
+  }
+  .badge.blue { color: var(--accent3); }
+  .badge.green { color: var(--accent4); }
+  .badge.red { color: var(--accent2); }
+
+  .hero-eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--accent);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 1.2rem;
+    animation: fadeUp 0.8s ease 0.1s both;
+  }
+
+  .hero-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(3.5rem, 8vw, 7rem);
+    font-weight: 900;
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+    animation: fadeUp 0.9s ease 0.2s both;
+  }
+
+  .hero-title span {
+    background: linear-gradient(135deg, var(--accent) 0%, #ff8c42 50%, var(--accent2) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .hero-sub {
+    font-size: 1.2rem;
+    color: var(--muted);
+    max-width: 600px;
+    margin: 1.5rem auto 2.5rem;
+    font-weight: 300;
+    animation: fadeUp 0.9s ease 0.35s both;
+  }
+
+  .hero-sub strong { color: var(--text); font-weight: 500; }
+
+  .cta-row {
+    display: flex; gap: 14px; flex-wrap: wrap; justify-content: center;
+    animation: fadeUp 0.9s ease 0.5s both;
+  }
+
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 14px 28px;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.25s;
+    border: none;
+  }
+  .btn-primary {
+    background: var(--accent);
+    color: #0a0a0f;
+    box-shadow: 0 0 40px rgba(244,166,35,0.35);
+  }
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 60px rgba(244,166,35,0.5);
+  }
+  .btn-outline {
+    background: transparent;
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+  .btn-outline:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    transform: translateY(-2px);
+  }
+
+  .scroll-hint {
+    position: absolute;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+    color: var(--muted);
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    animation: fadeUp 1s ease 1s both;
+  }
+  .scroll-arrow {
+    width: 20px; height: 20px;
+    border-right: 2px solid var(--muted);
+    border-bottom: 2px solid var(--muted);
+    transform: rotate(45deg);
+    animation: bounce 2s ease infinite;
+  }
+  @keyframes bounce { 0%,100%{transform:rotate(45deg) translateY(0)} 50%{transform:rotate(45deg) translateY(5px)} }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── SECTIONS ── */
+  section { padding: 6rem 2rem; max-width: 1100px; margin: 0 auto; }
+
+  .section-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 1rem;
+  }
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 700;
+    line-height: 1.15;
+    margin-bottom: 1.2rem;
+  }
+  .section-body {
+    color: var(--muted);
+    font-size: 1.05rem;
+    max-width: 660px;
+    font-weight: 300;
+  }
+  .section-body strong { color: var(--text); font-weight: 500; }
+
+  /* ── STORY ── */
+  .story-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    align-items: center;
+    margin-top: 3rem;
+  }
+  @media(max-width:700px){ .story-grid{ grid-template-columns:1fr; } }
+
+  .story-quote {
+    border-left: 3px solid var(--accent);
+    padding: 1.5rem 2rem;
+    background: var(--surface);
+    border-radius: 0 16px 16px 0;
+    font-family: 'Playfair Display', serif;
+    font-size: 1.25rem;
+    line-height: 1.6;
+    color: var(--text);
+    position: relative;
+  }
+  .story-quote::before {
+    content: '"';
+    font-size: 5rem;
+    line-height: 0;
+    position: absolute;
+    top: 2.5rem;
+    left: 1rem;
+    color: var(--accent);
+    opacity: 0.25;
+    font-family: 'Playfair Display', serif;
+  }
+
+  .stat-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.5rem;
+    transition: border-color 0.3s;
+  }
+  .stat-card:hover { border-color: var(--accent); }
+  .stat-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.5rem;
+    font-weight: 900;
+    color: var(--accent);
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .stat-label {
+    font-size: 13px;
+    color: var(--muted);
+    font-weight: 300;
+  }
+
+  /* ── FEATURES ── */
+  .features-section { background: none; }
+
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    margin-top: 3rem;
+  }
+  @media(max-width:900px){ .features-grid{ grid-template-columns:1fr 1fr; } }
+  @media(max-width:600px){ .features-grid{ grid-template-columns:1fr; } }
+
+  .feature-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 2rem;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.3s, border-color 0.3s, box-shadow 0.3s;
+    cursor: default;
+  }
+  .feature-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--card-accent, var(--accent));
+    border-radius: 2px 2px 0 0;
+  }
+  .feature-card:hover {
+    transform: translateY(-6px);
+    border-color: rgba(255,255,255,0.15);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+  }
+
+  .feature-icon {
+    font-size: 2.2rem;
+    margin-bottom: 1rem;
+    display: block;
+  }
+  .feature-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 0.6rem;
+  }
+  .feature-desc {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  .feature-card.large {
+    grid-column: span 2;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    align-items: center;
+  }
+  @media(max-width:700px){ .feature-card.large{ grid-column:span 1; grid-template-columns:1fr; } }
+
+  /* ── TECH STACK ── */
+  .tech-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-top: 3rem;
+  }
+  .tech-pill {
+    display: flex; align-items: center; gap: 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1rem 1.4rem;
+    transition: all 0.3s;
+  }
+  .tech-pill:hover {
+    border-color: var(--pill-color, var(--accent));
+    box-shadow: 0 0 20px var(--pill-glow, var(--glow));
+    transform: translateY(-2px);
+  }
+  .tech-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--pill-color, var(--accent));
+    flex-shrink: 0;
+    box-shadow: 0 0 8px var(--pill-color, var(--accent));
+  }
+  .tech-name {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--text);
+  }
+  .tech-role {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  /* ── FLOW / AGENTIC ── */
+  .flow-container {
+    margin-top: 3rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 2.5rem;
+  }
+  .flow-steps {
+    display: flex;
+    align-items: flex-start;
+    gap: 0;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .flow-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    flex: 1;
+    min-width: 140px;
+    max-width: 200px;
+    position: relative;
+  }
+  .flow-step:not(:last-child)::after {
+    content: '→';
+    position: absolute;
+    right: -10px;
+    top: 20px;
+    color: var(--accent);
+    font-size: 1.2rem;
+    font-weight: 300;
+  }
+  @media(max-width:700px){ .flow-step:not(:last-child)::after{display:none;} }
+
+  .flow-icon {
+    width: 48px; height: 48px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.4rem;
+    margin-bottom: 0.8rem;
+    transition: all 0.3s;
+  }
+  .flow-step:hover .flow-icon {
+    border-color: var(--accent);
+    box-shadow: 0 0 20px var(--glow);
+    transform: scale(1.1);
+  }
+  .flow-label {
+    font-size: 13px;
+    color: var(--text);
+    font-weight: 500;
+    margin-bottom: 4px;
+  }
+  .flow-sub { font-size: 11px; color: var(--muted); }
+
+  /* ── DEMO TERMINAL ── */
+  .terminal {
+    background: #0d0d15;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    margin-top: 2rem;
+  }
+  .terminal-bar {
+    background: var(--surface2);
+    padding: 12px 16px;
+    display: flex; align-items: center; gap: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  .dot-r { width:12px;height:12px;border-radius:50%;background:#ff5f57; }
+  .dot-y { width:12px;height:12px;border-radius:50%;background:#ffbd2e; }
+  .dot-g { width:12px;height:12px;border-radius:50%;background:#28ca41; }
+  .term-label { font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--muted); margin-left:auto; }
+
+  .terminal-body {
+    padding: 1.5rem 2rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    line-height: 1.9;
+  }
+  .t-prompt { color: var(--accent4); }
+  .t-text { color: var(--text); }
+  .t-vidya { color: var(--accent); }
+  .t-action { color: var(--accent3); }
+  .t-dim { color: var(--muted); }
+  .t-success { color: var(--accent4); }
+
+  .cursor {
+    display: inline-block;
+    width: 8px; height: 14px;
+    background: var(--accent);
+    vertical-align: middle;
+    animation: blink 1s step-end infinite;
+  }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+  /* ── SETUP ── */
+  .steps-list { margin-top: 2.5rem; counter-reset: step; }
+  .step-item {
+    display: flex; gap: 1.5rem;
+    padding: 1.5rem 0;
+    border-bottom: 1px solid var(--border);
+    counter-increment: step;
+    transition: all 0.3s;
+  }
+  .step-item:last-child { border-bottom: none; }
+  .step-item:hover { padding-left: 0.5rem; }
+
+  .step-num {
+    width: 40px; height: 40px;
+    border-radius: 12px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    color: var(--accent);
+    flex-shrink: 0;
+    font-weight: 600;
+  }
+  .step-content {}
+  .step-title { font-weight: 600; margin-bottom: 4px; }
+  .step-desc { font-size: 14px; color: var(--muted); font-weight: 300; }
+  .step-code {
+    display: inline-block;
+    margin-top: 8px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--accent4);
+  }
+
+  /* ── TABS ── */
+  .tab-row {
+    display: flex; gap: 6px; flex-wrap: wrap;
+    margin-top: 2.5rem;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 0;
+  }
+  .tab-btn {
+    padding: 10px 20px;
+    border: none; background: transparent;
+    color: var(--muted);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: all 0.2s;
+    font-weight: 500;
+  }
+  .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .tab-btn:hover:not(.active) { color: var(--text); }
+
+  .tab-panel { display: none; padding-top: 2rem; }
+  .tab-panel.active { display: block; }
+
+  .test-prompt {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1.2rem 1.5rem;
+    margin-bottom: 1rem;
+    display: flex; align-items: flex-start; gap: 1rem;
+    transition: all 0.3s;
+    cursor: pointer;
+  }
+  .test-prompt:hover {
+    border-color: var(--accent);
+    transform: translateX(6px);
+  }
+  .test-avatar {
+    width: 36px; height: 36px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem;
+    flex-shrink: 0;
+  }
+  .test-quote { font-style: italic; font-size: 15px; color: var(--text); }
+  .test-outcome { font-size: 12px; color: var(--accent4); margin-top: 4px; }
+
+  /* ── FOOTER ── */
+  footer {
+    text-align: center;
+    padding: 4rem 2rem;
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 14px;
+  }
+  footer strong { color: var(--accent); }
+
+  /* ── DIVIDER ── */
+  .divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border), transparent);
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  /* ── SCROLL ANIMATIONS ── */
+  .reveal {
+    opacity: 0;
+    transform: translateY(40px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* ── GEMMA BADGE ── */
+  .hackathon-banner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    background: linear-gradient(135deg, rgba(92,158,244,0.12), rgba(244,166,35,0.12));
+    border: 1px solid rgba(92,158,244,0.2);
+    border-radius: 14px;
+    padding: 14px 24px;
+    margin: 0 auto 3rem;
+    max-width: 520px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+    animation: fadeUp 0.9s ease 0.6s both;
+  }
+  .hackathon-banner span { font-size: 1.3rem; }
+
+  /* interactive demo buttons */
+  #demo-output {
+    margin-top: 1.5rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1.5rem;
+    min-height: 80px;
+    transition: all 0.4s;
+    font-size: 14px;
+    line-height: 1.7;
+  }
+  #demo-output.lit {
+    border-color: var(--accent);
+    box-shadow: 0 0 30px var(--glow);
+  }
+  .demo-btns { display:flex; gap:10px; flex-wrap:wrap; margin-top:1.5rem; }
+  .demo-btn {
+    padding: 10px 18px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    font-family: 'DM Sans',sans-serif;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .demo-btn:hover { border-color:var(--accent); color:var(--accent); transform:translateY(-2px); }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════ HERO ═══════════════════════ -->
+<section class="hero">
+  <div class="hero-orb hero-orb-1"></div>
+  <div class="hero-orb hero-orb-2"></div>
+  <div class="hero-orb hero-orb-3"></div>
+
+  <div class="badge-row">
+    <span class="badge">✦ Gemma 4 Good Hackathon</span>
+    <span class="badge blue">Android Native</span>
+    <span class="badge green">100% Offline</span>
+    <span class="badge red">Open Source</span>
+  </div>
+
+  <p class="hero-eyebrow">Introducing</p>
+
+  <h1 class="hero-title">Vidya <span>AI</span> ✨</h1>
+
+  <p class="hero-sub">
+    The <strong>offline-first, agentic learning companion</strong> powered by Gemma 4 —
+    bringing world-class AI tutoring to every child, everywhere, with zero internet required.
+  </p>
+
+  <div class="hackathon-banner">
+    <span>🏆</span>
+    Built for the <strong>Gemma 4 Good Hackathon</strong> &nbsp;·&nbsp; powered by <strong>Google LiteRT</strong>
+  </div>
+
+  <div class="cta-row">
+    <a href="#features" class="btn btn-primary">✦ Explore Features</a>
+    <a href="#setup" class="btn btn-outline">⚙ Get Started</a>
+    <a href="#demo" class="btn btn-outline">▶ Try the Demo</a>
+  </div>
+
+  <div class="scroll-hint">
+    <span>scroll</span>
+    <div class="scroll-arrow"></div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══════════════════════ THE STORY ═══════════════════════ -->
+<section id="story">
+  <div class="reveal">
+    <p class="section-label">§ 01 — The Problem</p>
+    <h2 class="section-title">The AI revolution is<br>behind a locked door.</h2>
+    <p class="section-body">
+      Millions of brilliant children across the world are blocked from the tools of tomorrow
+      by <strong>expensive subscriptions</strong> and <strong>unreliable connectivity</strong>.
+      We built Vidya to hand them the key.
+    </p>
+  </div>
+
+  <div class="story-grid reveal">
+    <div class="story-quote">
+      Imagine a brilliant child in a remote village with an insatiable curiosity about the stars —
+      but her smartphone rarely has internet, and cloud AI costs money her family doesn't have.
+    </div>
+    <div class="stat-grid">
+      <div class="stat-card">
+        <div class="stat-num">2.9B</div>
+        <div class="stat-label">People without reliable internet access globally</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">0</div>
+        <div class="stat-label">Bytes of internet data needed after first install</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">100%</div>
+        <div class="stat-label">Private — no data ever leaves the device</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">∞</div>
+        <div class="stat-label">Free tutoring sessions, forever</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══════════════════════ FEATURES ═══════════════════════ -->
+<section id="features" class="features-section">
+  <div class="reveal">
+    <p class="section-label">§ 02 — Core Innovations</p>
+    <h2 class="section-title">Not a chatbot.<br>A learning companion.</h2>
+    <p class="section-body">
+      Vidya acts as a Socratic "Didi" (big sister) — guiding, celebrating, and adapting to every child's unique journey.
+    </p>
+  </div>
+
+  <div class="features-grid reveal">
+
+    <!-- Large card -->
+    <div class="feature-card large" style="--card-accent: var(--accent)">
+      <div>
+        <span class="feature-icon">🧠</span>
+        <div class="feature-title">Proactive Agentic Empathy</div>
+        <div class="feature-desc">
+          Vidya autonomously executes background actions using <strong>Gemma 4's function-calling</strong> capabilities.
+          She detects when you succeed, awards XP, fires confetti, and unlocks badges — all without you asking.
+          From <em>Starter</em> to <em>Scholar</em> to <em>Legend</em>.
+        </div>
+      </div>
+      <div>
+        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:1.2rem;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.8">
+          <span style="color:var(--accent)">→ detect_success()</span><br>
+          <span style="color:var(--accent4)">✓ award_xp(amount=150)</span><br>
+          <span style="color:var(--accent3)">★ unlock_badge("Problem Solver")</span><br>
+          <span style="color:var(--accent2)">🎉 trigger_confetti()</span><br>
+          <span style="color:var(--muted)">// All running on-device, offline</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="feature-card" style="--card-accent: var(--accent3)">
+      <span class="feature-icon">🃏</span>
+      <div class="feature-title">Smart Flashcards</div>
+      <div class="feature-desc">When Vidya notices you struggling, she proactively saves the concept to your personal flashcard deck for later practice — automatically.</div>
+    </div>
+
+    <div class="feature-card" style="--card-accent: var(--accent2)">
+      <span class="feature-icon">📖</span>
+      <div class="feature-title">Vocabulary Builder</div>
+      <div class="feature-desc">Difficult words encountered during storytelling are automatically saved to your personal dictionary. Learn while you read.</div>
+    </div>
+
+    <div class="feature-card" style="--card-accent: var(--accent4)">
+      <span class="feature-icon">🎨</span>
+      <div class="feature-title">Handwriting Canvas</div>
+      <div class="feature-desc">A multi-color digital scratchpad for visually working through equations or sketching ideas. Math is tactile — Vidya knows this.</div>
+    </div>
+
+    <div class="feature-card" style="--card-accent: #c084fc">
+      <span class="feature-icon">🫀</span>
+      <div class="feature-title">Mood Tracker</div>
+      <div class="feature-desc">Emotional wellbeing is deeply tied to learning. An emoji-based daily journal lets children express themselves, helping Vidya adjust her tone and approach.</div>
+    </div>
+
+    <div class="feature-card" style="--card-accent: var(--accent)">
+      <span class="feature-icon">⏱</span>
+      <div class="feature-title">Focus Timer</div>
+      <div class="feature-desc">A built-in Pomodoro timer to help distracted students build lifelong healthy study habits — one 25-minute session at a time.</div>
+    </div>
+
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══════════════════════ AGENTIC FLOW ═══════════════════════ -->
+<section id="agentic">
+  <div class="reveal">
+    <p class="section-label">§ 03 — How It Works</p>
+    <h2 class="section-title">The Agentic Bridge</h2>
+    <p class="section-body">
+      Gemma 4's natural language output is wired directly to on-device Kotlin functions via a custom <strong>Android Intent bridge</strong> — making the model a first-class citizen of the app's runtime.
+    </p>
+  </div>
+
+  <div class="flow-container reveal">
+    <div class="flow-steps">
+      <div class="flow-step">
+        <div class="flow-icon">🗣</div>
+        <div class="flow-label">Student Input</div>
+        <div class="flow-sub">Voice or text message</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-icon">🤖</div>
+        <div class="flow-label">Gemma 4 (On-device)</div>
+        <div class="flow-sub">LiteRT inference</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-icon">🔧</div>
+        <div class="flow-label">Function Call</div>
+        <div class="flow-sub">Tool selection + params</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-icon">📱</div>
+        <div class="flow-label">Android Intent</div>
+        <div class="flow-sub">Custom agentic bridge</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-icon">✨</div>
+        <div class="flow-label">Live UI Action</div>
+        <div class="flow-sub">XP / Flashcard / Badge</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══════════════════════ TECH STACK ═══════════════════════ -->
+<section id="tech">
+  <div class="reveal">
+    <p class="section-label">§ 04 — Technical Stack</p>
+    <h2 class="section-title">Built for the edge.<br>Designed for the future.</h2>
+    <p class="section-body">
+      Every technical decision was made with one constraint in mind: <strong>zero internet, maximum impact.</strong>
+    </p>
+  </div>
+
+  <div class="tech-grid reveal">
+    <div class="tech-pill" style="--pill-color:#4285f4;--pill-glow:rgba(66,133,244,0.2)">
+      <div class="tech-dot"></div>
+      <div>
+        <div class="tech-name">Gemma 4</div>
+        <div class="tech-role">Core AI Model</div>
+      </div>
+    </div>
+    <div class="tech-pill" style="--pill-color:#34a853;--pill-glow:rgba(52,168,83,0.2)">
+      <div class="tech-dot"></div>
+      <div>
+        <div class="tech-name">Google LiteRT</div>
+        <div class="tech-role">On-Device ML Engine</div>
+      </div>
+    </div>
+    <div class="tech-pill" style="--pill-color:#f4a623;--pill-glow:rgba(244,166,35,0.2)">
+      <div class="tech-dot"></div>
+      <div>
+        <div class="tech-name">Jetpack Compose</div>
+        <div class="tech-role">Native Android UI</div>
+      </div>
+    </div>
+    <div class="tech-pill" style="--pill-color:#e05c5c;--pill-glow:rgba(224,92,92,0.2)">
+      <div class="tech-dot"></div>
+      <div>
+        <div class="tech-name">Hilt</div>
+        <div class="tech-role">Dependency Injection</div>
+      </div>
+    </div>
+    <div class="tech-pill" style="--pill-color:#7bed9f;--pill-glow:rgba(123,237,159,0.2)">
+      <div class="tech-dot"></div>
+      <div>
+        <div class="tech-name">SharedPreferences</div>
+        <div class="tech-role">Local Persistence</div>
+      </div>
+    </div>
+    <div class="tech-pill" style="--pill-color:#c084fc;--pill-glow:rgba(192,132,252,0.2)">
+      <div class="tech-dot"></div>
+      <div>
+        <div class="tech-name">Android Intents</div>
+        <div class="tech-role">Agentic Bridge</div>
+      </div>
+    </div>
+    <div class="tech-pill" style="--pill-color:#5c9ef4;--pill-glow:rgba(92,158,244,0.2)">
+      <div class="tech-dot"></div>
+      <div>
+        <div class="tech-name">Function Calling</div>
+        <div class="tech-role">Gemma 4 Tools API</div>
+      </div>
+    </div>
+    <div class="tech-pill" style="--pill-color:#f4a623;--pill-glow:rgba(244,166,35,0.2)">
+      <div class="tech-dot"></div>
+      <div>
+        <div class="tech-name">Android 12+</div>
+        <div class="tech-role">API Level 32</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══════════════════════ INTERACTIVE DEMO ═══════════════════════ -->
+<section id="demo">
+  <div class="reveal">
+    <p class="section-label">§ 05 — Interactive Demo</p>
+    <h2 class="section-title">Watch Vidya think.</h2>
+    <p class="section-body">
+      Click a sample prompt below to see how Vidya's agentic system detects context and fires real actions — no internet needed.
+    </p>
+  </div>
+
+  <div class="reveal">
+    <div id="demo-output">
+      <span style="color:var(--muted);font-style:italic">← Select a prompt to see Vidya in action</span>
+    </div>
+    <div class="demo-btns">
+      <button class="demo-btn" onclick="runDemo('math')">🧮 Solved a hard problem!</button>
+      <button class="demo-btn" onclick="runDemo('flashcard')">📚 I don't understand fractions</button>
+      <button class="demo-btn" onclick="runDemo('vocab')">📖 What does "ephemeral" mean?</button>
+      <button class="demo-btn" onclick="runDemo('mood')">😔 I feel frustrated today</button>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══════════════════════ SETUP ═══════════════════════ -->
+<section id="setup">
+  <div class="reveal">
+    <p class="section-label">§ 06 — Get Started</p>
+    <h2 class="section-title">Up and running<br>in minutes.</h2>
+    <p class="section-body">
+      Designed for hackathon reviewers and educators alike. No cloud keys, no API costs, no setup headaches.
+    </p>
+  </div>
+
+  <div class="reveal">
+    <div class="tab-row">
+      <button class="tab-btn active" onclick="switchTab('install', this)">Installation</button>
+      <button class="tab-btn" onclick="switchTab('test', this)">Testing Agentic Features</button>
+      <button class="tab-btn" onclick="switchTab('reqs', this)">Requirements</button>
+    </div>
+
+    <div id="tab-install" class="tab-panel active">
+      <div class="steps-list">
+        <div class="step-item">
+          <div class="step-num">1</div>
+          <div class="step-content">
+            <div class="step-title">Clone the repository</div>
+            <div class="step-desc">Get the source code onto your machine.</div>
+            <div class="step-code">git clone https://github.com/your-repo/vidya-ai</div>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-num">2</div>
+          <div class="step-content">
+            <div class="step-title">Open in Android Studio</div>
+            <div class="step-desc">Open the <code style="font-family:'JetBrains Mono',monospace;color:var(--accent4)">Android/</code> folder as a project and let Gradle sync completely.</div>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-num">3</div>
+          <div class="step-content">
+            <div class="step-title">Connect device & run</div>
+            <div class="step-desc">Connect an Android 12+ device or start an emulator, then click Run ▶</div>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-num">4</div>
+          <div class="step-content">
+            <div class="step-title">One-time model download</div>
+            <div class="step-desc">On first launch, Vidya downloads the Gemma 4 model. After that — <strong>fully offline forever.</strong></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="tab-test" class="tab-panel">
+      <div style="margin-top:1rem">
+        <p style="color:var(--muted);font-size:14px;margin-bottom:1.5rem">Try these prompts with Vidya to see the agentic system fire in real-time:</p>
+        <div class="test-prompt">
+          <div class="test-avatar">🧮</div>
+          <div>
+            <div class="test-quote">"I finally solved the difficult math problem!"</div>
+            <div class="test-outcome">→ Triggers: XP award + badge unlock + confetti animation</div>
+          </div>
+        </div>
+        <div class="test-prompt">
+          <div class="test-avatar">📚</div>
+          <div>
+            <div class="test-quote">"I don't understand fractions, can you explain and save it as a flashcard?"</div>
+            <div class="test-outcome">→ Triggers: Socratic explanation + autonomous flashcard creation</div>
+          </div>
+        </div>
+        <div class="test-prompt">
+          <div class="test-avatar">🔍</div>
+          <div>
+            <div class="test-quote">Navigate to Explore tab</div>
+            <div class="test-outcome">→ Test: Canvas scratchpad, Pomodoro timer, Times Tables, Mood journal</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="tab-reqs" class="tab-panel">
+      <div style="display:grid;gap:1rem;margin-top:1rem">
+        <div class="tech-pill" style="--pill-color:var(--accent4);--pill-glow:rgba(123,237,159,0.2)">
+          <div class="tech-dot"></div>
+          <div>
+            <div class="tech-name">Android 12+ (API 32)</div>
+            <div class="tech-role">Minimum OS requirement</div>
+          </div>
+        </div>
+        <div class="tech-pill" style="--pill-color:var(--accent3);--pill-glow:rgba(92,158,244,0.2)">
+          <div class="tech-dot"></div>
+          <div>
+            <div class="tech-name">2–3 GB free storage</div>
+            <div class="tech-role">For the Gemma 4 model weights</div>
+          </div>
+        </div>
+        <div class="tech-pill" style="--pill-color:var(--accent);--pill-glow:var(--glow)">
+          <div class="tech-dot"></div>
+          <div>
+            <div class="tech-name">Internet (first launch only)</div>
+            <div class="tech-role">One-time model download — then 100% offline</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══════════════════════ FOOTER ═══════════════════════ -->
+<footer>
+  <p style="font-size:1.8rem;margin-bottom:1rem">✨</p>
+  <p style="font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--text);margin-bottom:0.5rem">
+    Built with love for learners everywhere.
+  </p>
+  <p>Licensed under <strong>Apache 2.0</strong> &nbsp;·&nbsp; Submitted to the <strong>Gemma 4 Good Hackathon</strong></p>
+  <p style="margin-top:1rem;font-size:12px;letter-spacing:0.05em;color:var(--muted)">
+    Powered by Gemma 4 · Google LiteRT · Jetpack Compose · Made in India 🇮🇳
+  </p>
+</footer>
+
+<script>
+  // ── SCROLL REVEAL ──
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) { e.target.classList.add('visible'); }
+    });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+  // ── SMOOTH SCROLL ──
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      document.querySelector(a.getAttribute('href'))?.scrollIntoView({ behavior: 'smooth' });
+    });
+  });
+
+  // ── TABS ──
+  function switchTab(id, btn) {
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab-' + id).classList.add('active');
+    btn.classList.add('active');
+  }
+
+  // ── INTERACTIVE DEMO ──
+  const demos = {
+    math: {
+      lines: [
+        { t: 0,    text: `<span class="t-prompt">Student →</span> <span class="t-text">"I finally solved that difficult math problem!"</span>` },
+        { t: 600,  text: `<span class="t-dim">── Gemma 4 inference running on-device ──</span>` },
+        { t: 1200, text: `<span class="t-action">→ detect_success(context="math_problem")</span>` },
+        { t: 1800, text: `<span class="t-action">→ award_xp(amount=150, reason="Problem solved")</span>` },
+        { t: 2400, text: `<span class="t-success">✓ XP awarded! Total: 1,450 XP</span>` },
+        { t: 2800, text: `<span class="t-action">→ unlock_badge(id="problem_solver")</span>` },
+        { t: 3200, text: `<span class="t-success">🏅 Badge unlocked: "Problem Solver"</span>` },
+        { t: 3600, text: `<span class="t-action">→ trigger_confetti(duration=3000)</span>` },
+        { t: 4000, text: `<span class="t-vidya">Vidya → "That's amazing! I knew you could do it 🎉 You've earned 150 XP and the Problem Solver badge!"</span>` },
+      ]
+    },
+    flashcard: {
+      lines: [
+        { t: 0,    text: `<span class="t-prompt">Student →</span> <span class="t-text">"I don't understand fractions, explain and save as flashcard"</span>` },
+        { t: 600,  text: `<span class="t-dim">── Gemma 4 detecting knowledge gap ──</span>` },
+        { t: 1200, text: `<span class="t-action">→ generate_explanation(topic="fractions", style="socratic")</span>` },
+        { t: 2000, text: `<span class="t-vidya">Vidya → "Let's think about it together. If you cut a pizza into 4 equal slices and eat 1, what part do you have? 🍕"</span>` },
+        { t: 2800, text: `<span class="t-action">→ save_flashcard(topic="Fractions", difficulty="needs_practice")</span>` },
+        { t: 3400, text: `<span class="t-success">✓ Flashcard saved to your deck automatically!</span>` },
+        { t: 3800, text: `<span class="t-dim">// Student will see this in their review session later</span>` },
+      ]
+    },
+    vocab: {
+      lines: [
+        { t: 0,    text: `<span class="t-prompt">Student →</span> <span class="t-text">"What does 'ephemeral' mean?"</span>` },
+        { t: 600,  text: `<span class="t-dim">── Gemma 4 vocabulary agent active ──</span>` },
+        { t: 1200, text: `<span class="t-vidya">Vidya → "Ephemeral means something that lasts only for a very short time — like a bubble, or a rainbow. 🌈"</span>` },
+        { t: 2000, text: `<span class="t-action">→ save_to_dictionary(word="ephemeral", definition="...", example="...")</span>` },
+        { t: 2600, text: `<span class="t-success">✓ "ephemeral" added to your personal dictionary!</span>` },
+        { t: 3000, text: `<span class="t-action">→ award_xp(amount=10, reason="vocabulary_learned")</span>` },
+        { t: 3400, text: `<span class="t-success">✓ +10 XP for learning a new word 📚</span>` },
+      ]
+    },
+    mood: {
+      lines: [
+        { t: 0,    text: `<span class="t-prompt">Student →</span> <span class="t-text">"I feel really frustrated and tired today"</span>` },
+        { t: 600,  text: `<span class="t-dim">── Gemma 4 empathy module active ──</span>` },
+        { t: 1200, text: `<span class="t-action">→ detect_mood(sentiment="negative", intensity="moderate")</span>` },
+        { t: 1800, text: `<span class="t-action">→ adjust_tone(mode="gentle_supportive")</span>` },
+        { t: 2200, text: `<span class="t-action">→ log_mood_journal(emoji="😔", date=today)</span>` },
+        { t: 2800, text: `<span class="t-vidya">Vidya → "Hey, it's okay to feel that way 💛 Learning is hard sometimes. Want to take a 5-minute break with the Focus Timer? Or we can just talk."</span>` },
+        { t: 3600, text: `<span class="t-success">✓ Mood logged. Tone adjusted for this session.</span>` },
+      ]
+    }
+  };
+
+  function runDemo(key) {
+    const out = document.getElementById('demo-output');
+    out.innerHTML = '';
+    out.classList.add('lit');
+    const lines = demos[key].lines;
+    lines.forEach(({ t, text }) => {
+      setTimeout(() => {
+        out.innerHTML += `<div style="margin-bottom:4px;animation:fadeUp 0.4s ease both">${text}</div>`;
+        out.scrollTop = out.scrollHeight;
+      }, t);
+    });
+    setTimeout(() => out.classList.remove('lit'), lines[lines.length-1].t + 1500);
+  }
+</script>
+
+</body>
+</html>
